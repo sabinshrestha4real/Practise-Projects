@@ -52,8 +52,11 @@ class _NewNoteState extends State<NewNote> {
                 height: 10.0,
               ),
               TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 controller: desc,
-                decoration: InputDecoration(hintText: "Description"),
+                decoration: InputDecoration(
+                    border: InputBorder.none, hintText: "Description"),
               ),
               SizedBox(
                 height: 10.0,

@@ -70,8 +70,11 @@ class _EditNoteState extends State<EditNote> {
                 height: 10.0,
               ),
               TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 controller: desc,
-                decoration: InputDecoration(hintText: "Add description"),
+                decoration: InputDecoration(
+                    border: InputBorder.none, hintText: "Add description"),
               ),
               SizedBox(
                 height: 10.0,
