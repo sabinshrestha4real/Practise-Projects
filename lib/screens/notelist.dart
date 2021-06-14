@@ -12,6 +12,8 @@ class NoteList extends StatefulWidget {
 }
 
 class _NoteListState extends State<NoteList> {
+  List<NoteModel> notelist = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -23,19 +25,29 @@ class _NoteListState extends State<NoteList> {
     CollectionReference _collectionReference =
         FirebaseFirestore.instance.collection("data");
     _collectionReference.snapshots().listen((contain) {
-      List noteList = [];
       setState(() {
-        noteList = contain.docs;
+        notelist.clear();
+        var noteList = contain.docs;
         noteList.forEach((element) {
           notelist.add(NoteModel(
             title: element["title"],
-            desc: element["desc"],
+            desc: element["description"],
           ));
         });
 
         // notelist.map((e) => e.title.toSet().toList());
       });
     });
+  }
+
+  void deleteData(index) async {
+    setState(() {
+      notelist.removeAt(index);
+    });
+    CollectionReference _removeData =
+        FirebaseFirestore.instance.collection("data");
+    QuerySnapshot querySnapshot = await _removeData.get();
+    querySnapshot.docs[index].reference.delete();
   }
 
   void addData(title, desc) {
@@ -46,113 +58,116 @@ class _NoteListState extends State<NoteList> {
     CollectionReference collectionReference =
         FirebaseFirestore.instance.collection("data");
     collectionReference.add(firedata);
-
-    // var store = NoteModel(title: title, desc: desc);
-    // setState(() {
-    //   notelist.add(store);
-    // });
   }
 
-  List<NoteModel> notelist = [
-    // NoteModel(
-    //     title: 'First Note',
-    //     desc: 'This is my first note',
-    //     date: DateTime.now()),
-    // NoteModel(
-    //     title: 'Second Note',
-    //     desc: 'This is my second note',
-    //     date: DateTime.now()),
-  ];
+  void updateData(updatetitle, updatedesc, index) async {
+    CollectionReference _updateData =
+        FirebaseFirestore.instance.collection("data");
+    QuerySnapshot querySnapshot = await _updateData.get();
+    querySnapshot.docs[index].reference
+        .update({"title": updatetitle, "description": updatedesc});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           elevation: 0.0,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.yellow[200],
           title: Text(
             'Notes',
             style: TextStyle(color: Colors.black, fontSize: 22.0),
           ),
-          actions: [
-            IconButton(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: () {},
-                icon: Icon(
-                  Icons.search,
-                  color: Colors.black,
-                  size: 30.0,
-                ))
-          ],
+          // actions: [
+          //   IconButton(
+          //       splashColor: Colors.transparent,
+          //       highlightColor: Colors.transparent,
+          //       onPressed: () {},
+          //       icon: Icon(
+          //         Icons.search,
+          //         color: Colors.black,
+          //         size: 30.0,
+          //       ))
+          // ],
         ),
         body: notelist.length == 0
-            ? Center(
-                child: Text(
-                  'Oops! no any notes',
-                  style: TextStyle(color: Colors.grey),
+            ? Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/images/notebackground.jpg"),
+                        fit: BoxFit.cover)),
+                child: Center(
+                  child: Text(
+                    'Oops! no any notes',
+                    style: TextStyle(color: Colors.grey, fontSize: 20.0),
+                  ),
                 ),
               )
-            : ListView.builder(
-                shrinkWrap: true,
-                itemCount: notelist.length,
-                itemBuilder: (BuildContext context, index) {
-                  return Dismissible(
-                    background: Container(
-                      padding: EdgeInsets.only(right: 18.0),
-                      alignment: Alignment.centerRight,
-                      child: Icon(
-                        Icons.delete,
-                        color: Colors.grey,
-                      ),
-                      color: Colors.red,
-                    ),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (_) {
-                      setState(() {
-                        notelist.removeAt(index);
-                      });
-                    },
-                    key: UniqueKey(),
-                    child: Column(
-                      children: [
-                        Card(
-                          shadowColor: Colors.blue[200],
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(15.0))),
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EditNote(
-                                          notelist[index].title,
-                                          notelist[index].desc)));
-                            },
-                            title: Text(notelist[index].title),
-                            subtitle: Text(notelist[index].desc),
-                            trailing: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    notelist.removeAt(index);
-                                  });
-                                },
-                                icon: Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                )),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+            : Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage("assets/images/notebackground.jpg"),
+                        fit: BoxFit.cover)),
+                child: Column(
+                  children: [
+                    ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: notelist.length,
+                        itemBuilder: (BuildContext context, index) {
+                          return Dismissible(
+                            background: Container(
+                              padding: EdgeInsets.only(right: 18.0),
+                              alignment: Alignment.centerRight,
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.grey,
+                              ),
+                              color: Colors.red,
+                            ),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (direction) => deleteData(index),
+                            key: UniqueKey(),
+                            child: Column(
+                              children: [
+                                Card(
+                                  elevation: 7.0,
+                                  shadowColor: Colors.blue[200],
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(15.0))),
+                                  child: ListTile(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => EditNote(
+                                                  index,
+                                                  notelist[index].title,
+                                                  notelist[index].desc,
+                                                  updateData)));
+                                    },
+                                    title: Text(notelist[index].title),
+                                    subtitle: Text(notelist[index].desc),
+                                    trailing: IconButton(
+                                        onPressed: () => deleteData(index),
+                                        icon: Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        )),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                  ],
+                ),
+              ),
         bottomNavigationBar: ButtonTheme(
           height: MediaQuery.of(context).size.height / 15,
           minWidth: double.infinity,
           child: Container(
-            color: Colors.yellow,
+            color: Colors.yellow[200],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -175,7 +190,7 @@ class _NoteListState extends State<NoteList> {
                                     addData,
                                   )),
                         ),
-                    icon: Icon(Icons.note_alt_outlined))
+                    icon: Icon(Icons.add))
               ],
             ),
           ),

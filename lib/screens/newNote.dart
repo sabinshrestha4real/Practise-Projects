@@ -9,8 +9,22 @@ class NewNote extends StatefulWidget {
 }
 
 class _NewNoteState extends State<NewNote> {
+  final snackBar = SnackBar(content: Text('Baka! You missed title'));
+
   TextEditingController title = TextEditingController();
   TextEditingController desc = TextEditingController();
+
+  void submitted() {
+    if (title.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    widget.btnpress(title.text, desc.text);
+    Navigator.pop(
+      context,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +62,7 @@ class _NewNoteState extends State<NewNote> {
                   width: double.infinity,
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(primary: Colors.amber),
-                      onPressed: () {
-                        widget.btnpress(title.text, desc.text);
-                        Navigator.pop(
-                          context,
-                        );
-                      },
+                      onPressed: submitted,
                       child: Text('Save')))
             ],
           ),

@@ -14,7 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(color: Colors.amber)),
+        title: 'Note Banam',
+        theme: ThemeData(
+            appBarTheme: AppBarTheme(color: Colors.amber), fontFamily: 'Indie'),
         debugShowCheckedModeBanner: false,
         home: NoteList());
   }
